@@ -15,8 +15,13 @@ const Book = () => {
         // .then(res => parse(res))
         .then((data) => {
           data = data.text()
+          // console.log(data)
           .then(res => parse(res))
+          // console.log(res)
           .then((data) => {
+            document.querySelector("#block-multipurpose-business-theme-content > div:nth-child(1) > div > div.book-table.col-12.col-sm-7.ps-md-8.col-md-8 > div > table > tbody > tr:nth-child(1) > td")
+            //*[@id="block-multipurpose-business-theme-content"]/div[1]/div/div[2]/div/table/tbody/tr[1]/td
+            
             let inforow = data[2].children[3].children[5].children[29].children[3].children[7].children[7].children[1].children[1].children[1].children[1].children[1]
             let table = inforow.children[3]
             let title = table.children[1].children[1].children[3].children[0].content
