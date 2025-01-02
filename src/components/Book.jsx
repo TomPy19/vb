@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { parse } from 'himalaya';
 
 const Book = () => {
   const { isbn } = useParams();
@@ -19,6 +18,7 @@ const Book = () => {
 
       document.querySelector('#title').innerHTML = cleanTitle;
       console.log(cleanTitle)
+      
     })
     return;
 
