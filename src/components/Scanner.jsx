@@ -33,9 +33,6 @@ const Scanner = ({ onDetected }) => {
         const isbn = result.codeResult.code;
         onDetected(isbn);
         Quagga.stop();
-        setTimeout(() => {
-          Quagga.start();
-        }, 1000);
       } else {
         console.log("not detected");
       }

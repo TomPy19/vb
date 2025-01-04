@@ -6,6 +6,7 @@ function BookManager() {
   const [books, setBooks] = useState([]);
   const [isbn, setIsbn] = useState('');
   const [title, setTitle] = useState('');
+  const [scannerActive, setScannerActive] = useState(true);
 
   useEffect(() => {
     const savedBooks = JSON.parse(localStorage.getItem('books') || '[]');
@@ -44,11 +45,15 @@ function BookManager() {
     const fetchedTitle = await fetchBookTitle(isbn);
     // console.log(fetchedTitle);
     setTitle(fetchedTitle);
+    setScannerActive(false);
+    setTimeout(() => {
+      setScannerActive(true);
+    }, 800);
   };
 
   return (
     <div>
-      <Scanner onDetected={handleDetected} />
+      {scannerActive && <Scanner onDetected={handleDetected} />}
       <form onSubmit={handleSubmit}>
         <input
           type='text'
