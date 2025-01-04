@@ -1,44 +1,54 @@
-import {useState, useEffect} from 'react'
+import { useState, useEffect } from 'react';
+import Scanner from './Scanner';
+import { fetchBookTitle } from '../utils/fetchBookTitle';
 
 function BookManager() {
-  const [books, setBooks] = useState([])
-  const [isbn, setIsbn] = useState('')
-  const [title, setTitle] = useState('')
+  const [books, setBooks] = useState([]);
+  const [isbn, setIsbn] = useState('');
+  const [title, setTitle] = useState('');
 
   useEffect(() => {
-    const savedBooks = JSON.parse(localStorage.getItem('books') || '[]')
-    setBooks(savedBooks)
-  }, [])
+    const savedBooks = JSON.parse(localStorage.getItem('books') || '[]');
+    setBooks(savedBooks);
+  }, []);
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    const newBook = {isbn, title}
-    const updatedBooks = [...books, newBook]
-    localStorage.setItem('books', JSON.stringify(updatedBooks))
-    setBooks(updatedBooks)
-    setIsbn('')
-    setTitle('')
-  }
+    e.preventDefault();
+    const newBook = { isbn, title };
+    const updatedBooks = [...books, newBook];
+    localStorage.setItem('books', JSON.stringify(updatedBooks));
+    setBooks(updatedBooks);
+    setIsbn('');
+    setTitle('');
+  };
 
   const handleDelete = (isbnToDelete) => {
-    const filteredBooks = books.filter(book => book.isbn !== isbnToDelete)
-    localStorage.setItem('books', JSON.stringify(filteredBooks))
-    setBooks(filteredBooks)
-  }
+    const filteredBooks = books.filter(book => book.isbn !== isbnToDelete);
+    localStorage.setItem('books', JSON.stringify(filteredBooks));
+    setBooks(filteredBooks);
+  };
 
   const handleExport = () => {
-    const dataStr = JSON.stringify(books, null, 2)
-    const blob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'books.json'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+    const dataStr = JSON.stringify(books, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'books.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDetected = async (isbn) => {
+    setIsbn(isbn);
+    const fetchedTitle = await fetchBookTitle(isbn);
+    // console.log(fetchedTitle);
+    setTitle(fetchedTitle);
+  };
 
   return (
     <div>
+      <Scanner onDetected={handleDetected} />
       <form onSubmit={handleSubmit}>
         <input
           type='text'
@@ -64,7 +74,7 @@ function BookManager() {
         ))}
       </ul>
     </div>
-  )
+  );
 }
 
-export default BookManager
+export default BookManager;

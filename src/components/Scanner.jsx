@@ -1,17 +1,14 @@
-import React, { useEffect } from 'react';
-import Quagga from 'quagga';
+import { useEffect } from 'react';
+import Quagga from 'quagga'; // Ensure Quagga is imported
 
-const Scanner = () => {
-  let isbn = null;
-  let sucScan = 0;
-
+const Scanner = ({ onDetected }) => {
   useEffect(() => {
     Quagga.init({
       inputStream: {
         name: "Live",
         type: "LiveStream",
         target: document.querySelector('#scanner-container')
-      }, 
+      },
       decoder: {
         readers: ["ean_reader"]
       },
@@ -21,39 +18,35 @@ const Scanner = () => {
         drawScanline: true,
         showPattern: true,
       },
-    }, 
-      (err) => {
-        if (err) {
-          console.log(err);
-          return
-        }
-        console.log("Initialization finished. Ready to start");
-        Quagga.start();
+    }, (err) => {
+      if (err) {
+        console.log(err);
+        return;
       }
-    );
+      console.log("Initialization finished. Ready to start");
+      Quagga.start();
+    });
 
     Quagga.onDetected((result) => {
-      // console.log('Barcode detected:', result.codeResult.code);
-      sucScan++;
-      console.log(sucScan)
-      if (sucScan > 100) {
+      console.log(result);
+      if (result && result.codeResult && result.codeResult.code) {
+        const isbn = result.codeResult.code;
+        onDetected(isbn);
         Quagga.stop();
-        window.location.href = '/book/'+result.codeResult.code;
+        setTimeout(() => {
+          Quagga.start();
+        }, 1000);
+      } else {
+        console.log("not detected");
       }
-      // document.querySelector('#barcode-text').innerHTML = 'ISBN: '+result.codeResult.code;
     });
 
     return () => {
       Quagga.stop();
-    }
-  }, []);
+    };
+  }, [onDetected]);
 
-  return (
-    <div id="scanner-wrapper">
-      <div id="scanner-container"></div>
-      <h3 id="barcode-text">ISBN:</h3>
-    </div>
-  );
+  return <div id="scanner-container" />;
 };
 
 export default Scanner;
