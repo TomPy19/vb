@@ -1,7 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Quagga from 'quagga'; // Ensure Quagga is imported
 
 const Scanner = ({ onDetected }) => {
+  const isProcessing = useRef(false);
+
   useEffect(() => {
     Quagga.init({
       inputStream: {
@@ -28,13 +30,20 @@ const Scanner = ({ onDetected }) => {
     });
 
     Quagga.onDetected((result) => {
-      console.log(result);
+      if (isProcessing.current) return;
+
+      console.log(result); // Log the result to understand its structure
       if (result && result.codeResult && result.codeResult.code) {
         const isbn = result.codeResult.code;
+        isProcessing.current = true;
         onDetected(isbn);
-        Quagga.stop();
+
+        // Ignore subsequent detections for a short period
+        setTimeout(() => {
+          isProcessing.current = false;
+        }, 1000); // Adjust the delay as needed
       } else {
-        console.log("not detected");
+        console.log("No valid code detected");
       }
     });
 
