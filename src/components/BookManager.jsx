@@ -7,30 +7,50 @@ function BookManager() {
   const [isbn, setIsbn] = useState('');
   const [title, setTitle] = useState('');
   const [cover, setCover] = useState('');
+  const [quantity, setQuantity] = useState(1);
   const [editIndex, setEditIndex] = useState(null);
 
   useEffect(() => {
     const savedBooks = JSON.parse(localStorage.getItem('books') || '[]');
-    setBooks(savedBooks);
+    const updatedBooks = savedBooks.map(book => {
+      if (!book.quantity || book.quantity < 1) {
+        return { ...book, quantity: 1 };
+      }
+      return book;
+    });
+    if (JSON.stringify(savedBooks) !== JSON.stringify(updatedBooks)) {
+      localStorage.setItem('books', JSON.stringify(updatedBooks));
+    }
+    setBooks(updatedBooks);
   }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newBook = { isbn, title, cover, quantity: parseInt(quantity, 10) };
+
     if (editIndex !== null) {
       const updatedBooks = [...books];
-      updatedBooks[editIndex] = { isbn, title, cover };
+      updatedBooks[editIndex] = newBook;
       localStorage.setItem('books', JSON.stringify(updatedBooks));
       setBooks(updatedBooks);
       setEditIndex(null);
     } else {
-      const newBook = { isbn, title, cover };
-      const updatedBooks = [...books, newBook];
-      localStorage.setItem('books', JSON.stringify(updatedBooks));
-      setBooks(updatedBooks);
+      const existingBookIndex = books.findIndex(book => book.isbn === isbn);
+      if (existingBookIndex !== -1) {
+        const updatedBooks = [...books];
+        updatedBooks[existingBookIndex].quantity += newBook.quantity;
+        localStorage.setItem('books', JSON.stringify(updatedBooks));
+        setBooks(updatedBooks);
+      } else {
+        const updatedBooks = [...books, newBook];
+        localStorage.setItem('books', JSON.stringify(updatedBooks));
+        setBooks(updatedBooks);
+      }
     }
     setIsbn('');
     setTitle('');
     setCover('');
+    setQuantity(1);
   };
 
   const handleDelete = (isbnToDelete) => {
@@ -46,6 +66,7 @@ function BookManager() {
     setIsbn(bookToEdit.isbn);
     setTitle(bookToEdit.title);
     setCover(bookToEdit.cover);
+    setQuantity(bookToEdit.quantity);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -54,6 +75,7 @@ function BookManager() {
     setIsbn('');
     setTitle('');
     setCover('');
+    setQuantity(1);
   };
 
   const handleExport = () => {
@@ -113,6 +135,13 @@ function BookManager() {
           value={cover}
           onChange={(e) => setCover(e.target.value)}
         />
+        <input
+          type='number'
+          placeholder='Quantity'
+          value={quantity}
+          onChange={(e) => setQuantity(e.target.value)}
+          min="1"
+        />
         <button type='submit'>{editIndex !== null ? 'Save Changes' : 'Add Book'}</button>
         {editIndex !== null && <button type='button' onClick={handleCancel}>Cancel</button>}
       </form>
@@ -121,7 +150,7 @@ function BookManager() {
         {sortedBooks.map((book) => (
           <li key={book.isbn}>
             <img src={book.cover} alt={book.title} width="50" style={{ paddingRight: '10px' }} />
-            {book.title} (ISBN: {book.isbn})
+            {book.title} (ISBN: {book.isbn}) - Quantity: {book.quantity}
             <button onClick={() => handleEdit(book.isbn)}>Edit</button>
             <button onClick={() => handleDelete(book.isbn)}>Delete</button>
             <button onClick={() => window.open(`https://isbndb.com/book/${book.isbn}`, '_blank')}>View Details</button>
