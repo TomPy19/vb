@@ -114,6 +114,7 @@ function BookManager() {
 
   return (
     <div>
+      <h2>Total Books: {books.length}</h2>
       {memoizedScanner}
       <form onSubmit={handleSubmit}>
         <input
